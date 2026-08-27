@@ -102,6 +102,18 @@
   .pill{background:var(--shot);color:#fff;font-size:10px;font-weight:700;padding:2px 7px;
         border-radius:20px;margin-left:7px;vertical-align:middle}
 
+  /* search results */
+  #res{margin:8px 0}
+  .rr{display:flex;align-items:center;gap:8px;width:100%;text-align:left;padding:10px 8px;
+      border:0;border-bottom:1px solid #EFF3F4;background:none;font-family:var(--cn);
+      font-size:14px;color:var(--ink);cursor:pointer}
+  .rr:active{background:#EDF1F2}
+  .rr .nm{flex:1}
+  .rr .un{font-size:11px;color:var(--mut);margin-left:5px}
+  .rr .kp{font-size:12px;color:var(--mut);font-variant-numeric:tabular-nums;flex:none}
+  .rr .hi{font-size:9px;background:#FDF4F2;color:var(--shot);border-radius:20px;padding:2px 6px;flex:none}
+  .noq{font-size:12px;color:var(--mut);padding:8px 2px}
+
   /* inputs */
   .grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px}
   label{display:block;font-size:11px;color:var(--mut);margin-bottom:3px}
@@ -148,6 +160,8 @@
 
 <div class="card">
   <h2>快速加入</h2>
+  <input id="q" placeholder="🔍 查食物　例：滷肉飯、鮭魚、芭樂" style="margin-bottom:4px">
+  <div id="res"></div>
   <div id="foods"></div>
   <div class="gl" style="margin-top:14px">自訂</div>
   <div class="grid" style="grid-template-columns:1.4fr 1fr 1fr">
@@ -206,7 +220,140 @@ const FOODS=[
 ];
 const HABITS=[["walk","走路 20 分以上"],["lift","肌力訓練"],["sleep","睡足 7 小時"],["night","沒吃宵夜甜飲"]];
 const DOSES=["0.25","0.5","1.0","1.7","2.4"];
-const SX=["噁心","胃脹","便祕","腹瀉","沒胃口","都還好"];
+/* 食物資料庫｜格式：名稱|份量|熱量|蛋白質|纖維|普林偏高
+   原料類參考國人常用食品成分，餐點類為常見市售份量估算 */
+const DB=`白飯|熟100g(約半碗)|130|2.4|0.4
+糙米飯|熟100g|122|2.6|1.6
+稀飯|1碗|70|1.5|0.3
+白吐司|1片|78|2.6|0.9
+全麥吐司|1片|80|3|2
+饅頭|1個|220|6.5|1.2
+肉包|1個|250|9|1.5
+油條|1條|250|5|1
+麵條|熟100g|130|4|1
+意麵|1份|300|9|2
+米粉|熟100g|110|1.5|0.5
+冬粉|熟100g|85|0.1|0.4
+地瓜|100g|110|1.3|2.4
+馬鈴薯|100g|77|2|1.3
+玉米|1根|130|4|4.5
+南瓜|100g|74|1.9|1.7
+芋頭|100g|128|2.5|2.3
+燕麥片|乾30g|115|4|3
+雞胸肉 去皮|生100g|110|23|0
+雞腿 去皮|生100g|145|20|0
+雞腿 帶皮|生100g|215|17|0
+雞翅|100g|210|18|0
+豬里肌|100g|130|22|0
+豬五花|100g|350|15|0
+豬絞肉|100g|220|18|0
+豬肝|100g|120|20|0|1
+牛腱|100g|140|21|0
+牛五花|100g|330|15|0
+沙朗牛排|100g|200|20|0
+羊肉|100g|200|18|0
+鮭魚|100g|200|20|0
+鯖魚|100g|400|15|0|1
+鯛魚|100g|110|20|0
+虱目魚|100g|200|20|0
+白帶魚|100g|130|18|0
+秋刀魚|100g|300|19|0|1
+鮪魚|100g|130|24|0
+吳郭魚|100g|107|20|0
+蝦仁|100g|100|20|0|1
+蛤蜊|100g|40|8|0|1
+牡蠣|100g|70|9|0|1
+花枝|100g|60|13|0
+雞蛋|1顆|75|7|0
+蛋白|1顆|17|4|0
+無糖豆漿|240ml|65|7|1
+無糖豆漿|400ml|110|12|1.5
+傳統豆腐|100g|88|8.5|0.6
+嫩豆腐|100g|53|5|0.4
+豆干|100g|160|17|2|1
+百頁豆腐|100g|215|13|0.5
+黃豆|乾50g|190|18|8|1
+毛豆|100g|125|14|6|1
+高麗菜|100g|23|1.3|1.1
+青江菜|100g|15|1.4|1.4
+菠菜|100g|18|2.2|1.9
+白花椰菜|100g|23|1.8|2
+青花菜|100g|28|3.7|3
+空心菜|100g|22|1.4|2.1
+大番茄|1顆|33|1.6|1.9
+小番茄|100g|35|1|1.8
+洋蔥|100g|42|1|1.4
+紅蘿蔔|100g|39|1|2.6
+小黃瓜|100g|13|0.9|0.9
+金針菇|100g|37|2.6|2.3|1
+鮮香菇|100g|39|3|3.8
+杏鮑菇|100g|41|2.3|3.1
+海帶|100g|20|1|3
+黑木耳|100g|38|0.9|6.5
+蘆筍|100g|23|2.3|1.5|1
+豆芽菜|100g|30|3|1.5
+四季豆|100g|30|2|2
+蘋果|1顆|95|0.4|3
+香蕉|1根|105|1.3|2
+芭樂|1顆|70|1.5|4
+橘子|1顆|50|0.8|1.8
+奇異果|1顆|45|0.8|2
+葡萄|10顆|60|0.5|0.5
+西瓜|1片|60|1|0.6
+鳳梨|100g|50|0.5|1.1
+芒果|100g|60|0.6|1.2
+無糖優格|100g|60|5|0
+無糖希臘優格|100g|60|10|0
+全脂鮮奶|240ml|150|8|0
+低脂鮮奶|240ml|105|8|0
+無糖拿鐵|大杯360ml|150|8|0
+起司片|1片|60|4|0
+滷肉飯|小碗|400|12|1
+雞腿飯便當|1個|700|35|3
+排骨飯便當|1個|750|30|3
+牛肉麵|1碗|550|30|3
+陽春麵|1碗|350|10|2
+乾麵|小碗|400|10|2
+餛飩麵|1碗|450|20|2
+炒飯|1盤|650|18|2
+炒麵|1盤|600|15|3
+水餃|10顆|500|20|3
+鍋貼|10個|550|20|3
+小籠包|8顆|450|18|2
+蛋餅|1份|250|9|1
+蔥抓餅加蛋|1份|400|10|2
+飯糰|1個|350|10|2
+火腿蛋三明治|1份|300|13|2
+雞腿堡|1個|500|25|2
+滷味|1份約300g|350|20|5
+關東煮|3樣|150|10|2
+臭豆腐|1份|400|15|4
+鹽酥雞|小份|450|20|1
+炸雞排|1片|600|35|1
+胡椒餅|1個|350|12|1
+車輪餅|1個|200|4|1
+自助餐 3菜1肉加飯|1餐|700|30|6
+日式鮭魚定食|1份|650|35|4
+蔬菜肉片火鍋|1鍋|600|35|8
+麻辣鍋|1鍋|800|30|6
+21世紀雞腿|不含飯|350|30|0
+大麥克套餐|含中薯中可樂|1000|30|5
+大麥克|單點|520|26|3
+麥克雞塊|6塊|280|15|1
+勁辣雞腿堡|單點|570|27|3
+麥香魚|單點|350|15|2
+薯條|中份|330|4|3
+可樂|中杯|150|0|0
+必勝客大披薩|3片|900|40|5
+必勝客大披薩|1片|300|13|1.7
+肯德基炸雞|1塊|300|22|0
+蛋撻|1個|200|3|0.5
+摩斯米漢堡|1個|320|12|2
+Subway 潛艇堡|6吋雞肉|320|22|4
+珍珠奶茶|中杯|450|5|0
+生啤酒|500ml|200|2|0|1`
+.trim().split('\n').map(r=>{const p=r.split('|');
+  return{n:p[0],u:p[1],k:+p[2],p:+p[3],f:+p[4]||0,hi:p[5]==='1'}});
 
 /* 儲存：優先用 Claude 儲存，本機開檔時退回 localStorage，兩者都不行才用記憶體 */
 const MEM={};
@@ -338,6 +485,8 @@ document.addEventListener('click',async e=>{
   if(t.dataset.dose){const s=findShot(iso);if(s){s.dose=t.dataset.dose;await S.set('wl:shots',shots);render()}return}
   if(t.dataset.sx){const s=t.dataset.sx;
     day.sx=day.sx.includes(s)?day.sx.filter(x=>x!==s):[...day.sx,s];save();return}
+  if(t.dataset.db){const d=DB[+t.dataset.db];
+    day.items.push([`${d.n} ${d.u}`,d.k,d.p,d.f]);save();return}
   if(t.dataset.w){day.water.push(+t.dataset.w);save()}
   else if(t.id==='wundo'){day.water.pop();save()}
   else if(t.dataset.f){day.items.push(JSON.parse(t.dataset.f));save()}
@@ -356,6 +505,20 @@ document.addEventListener('click',async e=>{
     await S.set('wl:measures',logs);
     mw.value=ms.value=mf.value=mm.value='';render()}
 });
+/* 食物搜尋 */
+q.oninput=()=>{
+  const s=q.value.trim();
+  if(!s){res.innerHTML='';foods.style.display='';return}
+  foods.style.display='none';
+  const hit=DB.filter(d=>d.n.includes(s)||d.u.includes(s)).slice(0,14);
+  res.innerHTML=hit.length?hit.map((d,i)=>
+    `<button class="rr" data-db="${DB.indexOf(d)}">
+      <span class="nm">${d.n}<span class="un">${d.u}</span></span>
+      ${d.hi?'<span class="hi">普林高</span>':''}
+      <span class="kp">${d.k} kcal・${d.p}g</span></button>`).join('')
+    :`<div class="noq">清單裡沒有這項。用下面的「自訂」手動填，或告訴我要加什麼。</div>`;
+};
+
 /* 匯出／匯入 */
 function showMode(){
   smode.textContent=MODE==='cloud'
