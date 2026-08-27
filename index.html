@@ -389,8 +389,10 @@ const S={
     return Object.keys(MEM)}
 };
 let cur=new Date(), day=null, logs=[];
-const key=d=>'wl:'+d.toISOString().slice(0,10);
-const isoToday=new Date().toISOString().slice(0,10);
+/* 一律用本地日期，避免 UTC 造成凌晨的紀錄跑到前一天 */
+const ymd=d=>`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+const key=d=>'wl:'+ymd(d);
+const isoToday=ymd(new Date());
 
 let shots=[];
 function blank(){return{water:[],items:[],habits:{},sx:[]}}
@@ -452,7 +454,7 @@ function bar(lab,val,fill,lo,hi,unit,color){
 
 function render(){
   const D=['日','一','二','三','四','五','六'][cur.getDay()];
-  const iso=cur.toISOString().slice(0,10);
+  const iso=ymd(cur);
   dlab.textContent=`${cur.getMonth()+1}/${cur.getDate()}`;
   dsub.textContent=(iso===isoToday?`週${D}・今天`:`週${D}`)+(findShot(iso)?'　💉':'');
   next.disabled=iso>=isoToday;
@@ -492,7 +494,7 @@ async function save(){await S.set(key(cur),day);render()}
 
 document.addEventListener('click',async e=>{
   const t=e.target.closest('button,.hab,.sx'); if(!t)return;
-  const iso=cur.toISOString().slice(0,10);
+  const iso=ymd(cur);
   if(t.id==='stog'){
     const i=shots.findIndex(s=>s.d===iso);
     if(i>=0)shots.splice(i,1); else shots.push({d:iso,dose:(lastShotBefore(iso)||{dose:'0.25'}).dose});
@@ -516,7 +518,7 @@ document.addEventListener('click',async e=>{
     cn.value=ck.value=cp.value='';save()}
   else if(t.id==='msave'){
     if(!mw.value&&!ms.value&&!mf.value&&!mm.value)return;
-    logs.unshift({d:cur.toISOString().slice(0,10),w:mw.value,s:ms.value,f:mf.value,m:mm.value});
+    logs.unshift({d:ymd(cur),w:mw.value,s:ms.value,f:mf.value,m:mm.value});
     await S.set('wl:measures',logs);
     mw.value=ms.value=mf.value=mm.value='';render()}
 });
@@ -548,7 +550,7 @@ exp.onclick=async()=>{
   const blob=new Blob([JSON.stringify({v:1,at:new Date().toISOString(),data},null,1)],{type:'application/json'});
   const a=document.createElement('a');
   a.href=URL.createObjectURL(blob);
-  a.download=`減重紀錄-${new Date().toISOString().slice(0,10)}.json`;
+  a.download=`減重紀錄-${ymd(new Date())}.json`;
   a.click();URL.revokeObjectURL(a.href);
   bmsg.textContent='已匯出。建議存到雲端硬碟或傳給自己的 LINE。';
 };
