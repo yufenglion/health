@@ -147,6 +147,7 @@
     <div><span class="num" id="wml">0</span> <em>/ 2,100 ml</em></div>
     <em id="wpct" style="font-style:normal;font-size:12px;color:var(--mut)"></em>
   </div>
+  <div id="wsplit" style="font-size:12px;color:var(--mut);margin:-6px 0 12px"></div>
   <div class="bottles" id="btls"></div>
   <div class="wbtns">
     <button data-w="150">+150</button>
@@ -154,6 +155,7 @@
     <button data-w="600">+600</button>
     <button class="gh" id="wundo">復原</button>
   </div>
+  <p class="note" id="wwarn" style="margin-top:10px;color:#7A4232"></p>
 </div>
 
 <div class="card" id="bars"></div>
@@ -216,10 +218,10 @@
 <p class="note" style="text-align:center;padding:0 6px">食物數值為常見市售品項的估算值，用來抓趨勢而非精算。用藥、劑量與抽血追蹤請依你的醫師指示。</p>
 
 <script>
-const TGT={water:2100,kcal:[1250,1400],prot:[80,100],fib:25};
+const TGT={water:2100,plain:1200,kcal:[1250,1400],prot:[80,100],fib:25};
 const BOTTLES=[600,600,600,300];
 const FOODS=[
- ["飲品",[["無糖拿鐵 大杯",150,8,0],["無糖豆漿 400ml",130,12,1.5],["無糖茶／每朝",0,0,0],["無糖優格 1杯",100,15,0],["黑咖啡",5,0,0]]],
+ ["飲品",[["無糖拿鐵 大杯",150,8,0,360],["無糖豆漿 400ml",130,12,1.5,400],["無糖茶 500ml",0,0,0,500],["每朝健康 650ml",0,0,0,650],["無糖優格 1杯",100,15,0,0],["黑咖啡",5,0,0,240]]],
  ["蛋白質",[["茶葉蛋／水煮蛋 1顆",75,7,0],["雞胸肉 100g",165,31,0],["去皮雞腿 100g",155,24,0],["鮭魚 100g",200,22,0],["白肉魚 150g",165,30,0],["蝦仁 100g",100,20,0],["瘦牛肉 100g",180,26,0],["豆腐 半盒",110,12,1]]],
  ["澱粉",[["白飯 半碗",140,2.5,0.5],["白飯 一碗",280,5,1],["小地瓜 1條",90,1.5,2.5],["全麥吐司 1片",80,3,2],["玉米 半根",60,2,2],["冬粉 半份",90,0.5,0.5]]],
  ["蔬果",[["青菜 1大碗",50,3,4],["菇類 1碗",30,3,3],["番茄 1顆",25,1,1.5],["水果 1份",60,0.5,2],["生菜沙拉",40,2,3]]],
@@ -275,8 +277,8 @@ const DB=`白飯|熟100g(約半碗)|130|2.4|0.4
 花枝|100g|60|13|0
 雞蛋|1顆|75|7|0
 蛋白|1顆|17|4|0
-無糖豆漿|240ml|65|7|1
-無糖豆漿|400ml|110|12|1.5
+無糖豆漿|240ml|65|7|1|0|240
+無糖豆漿|400ml|110|12|1.5|0|400
 傳統豆腐|100g|88|8.5|0.6
 嫩豆腐|100g|53|5|0.4
 豆干|100g|160|17|2|1
@@ -313,9 +315,9 @@ const DB=`白飯|熟100g(約半碗)|130|2.4|0.4
 芒果|100g|60|0.6|1.2
 無糖優格|100g|60|5|0
 無糖希臘優格|100g|60|10|0
-全脂鮮奶|240ml|150|8|0
-低脂鮮奶|240ml|105|8|0
-無糖拿鐵|大杯360ml|150|8|0
+全脂鮮奶|240ml|150|8|0|0|240
+低脂鮮奶|240ml|105|8|0|0|240
+無糖拿鐵|大杯360ml|150|8|0|0|360
 起司片|1片|60|4|0
 滷肉飯|小碗|400|12|1
 雞腿飯便當|1個|700|35|3
@@ -352,7 +354,7 @@ const DB=`白飯|熟100g(約半碗)|130|2.4|0.4
 勁辣雞腿堡|單點|570|27|3
 麥香魚|單點|350|15|2
 薯條|中份|330|4|3
-可樂|中杯|150|0|0
+可樂|中杯|150|0|0|0|400
 必勝客大披薩|3片|900|40|5
 必勝客大披薩|1片|300|13|1.7
 肯德基炸雞|1塊|300|22|0
@@ -365,10 +367,24 @@ Subway 潛艇堡|6吋雞肉|320|22|4
 貢丸|1顆|50|2.5|0
 竹筍|100g|25|1.5|2.3
 地瓜葉|100g|30|2.4|3.3
-珍珠奶茶|中杯|450|5|0
+珍珠奶茶|中杯|450|5|0|0|500
+陽光鱈魚堡|1個|280|15|1
+小饅頭|1個|50|1.5|0.3
+水餃|6顆|300|12|1.8
+炒飯|半盤|300|9|1
+豬血大腸|1份|180|8|1|1
+檸檬紅茶|中杯有糖|123|0|0|0|500
+無糖綠茶|500ml|0|0|0|0|500
+無糖紅茶|500ml|0|0|0|0|500
+無糖紅茶|特大杯700ml|0|0|0|0|700
+無糖烏龍茶|500ml|0|0|0|0|500
+無糖麥茶|500ml|0|0|0|0|500
+每朝健康綠茶|650ml|0|0|0|0|650
+氣泡水|500ml|0|0|0|0|500
+黑咖啡|240ml|5|0|0|0|240
 生啤酒|500ml|200|2|0|1`
 .trim().split('\n').map(r=>{const p=r.split('|');
-  return{n:p[0],u:p[1],k:+p[2],p:+p[3],f:+p[4]||0,hi:p[5]==='1'}});
+  return{n:p[0],u:p[1],k:+p[2],p:+p[3],f:+p[4]||0,hi:p[5]==='1',ml:+p[6]||0}});
 
 /* 儲存：優先用 Claude 儲存，本機開檔時退回 localStorage，兩者都不行才用記憶體 */
 const MEM={};
@@ -433,14 +449,20 @@ function renderShot(iso){
 }
 function sum(f){return day.items.reduce((a,i)=>a+i[f],0)}
 
-function bottleSVG(cap,filled){
-  const h=Math.round(46*cap/600)+14, lvl=Math.max(0,Math.min(1,filled/cap));
-  const bodyTop=10, bodyH=h-bodyTop, fh=bodyH*lvl;
+let bid=0;
+function bottleSVG(cap,plainMl,drinkMl){
+  const h=Math.round(46*cap/600)+14, bodyTop=10, bodyH=h-bodyTop, id='b'+(bid++);
+  const ph=bodyH*Math.max(0,Math.min(1,plainMl/cap));
+  const dh=bodyH*Math.max(0,Math.min(1,drinkMl/cap));
+  const shape=`M9 ${bodyTop} q6-4 12 0 v${bodyH-4} q0 4-4 4 h-4 q-4 0-4-4z`;
   return `<svg viewBox="0 0 30 ${h+2}" aria-hidden="true">
    <rect x="11" y="0" width="8" height="6" rx="1.5" fill="#C6D2D7"/>
-   <path d="M9 ${bodyTop} q6-4 12 0 v${bodyH-4} q0 4-4 4 h-4 q-4 0-4-4z" fill="#F1F5F6"/>
-   <clipPath id="c${cap}${filled}"><path d="M9 ${bodyTop} q6-4 12 0 v${bodyH-4} q0 4-4 4 h-4 q-4 0-4-4z"/></clipPath>
-   <rect x="0" y="${bodyTop+bodyH-fh}" width="30" height="${fh}" fill="var(--water)" clip-path="url(#c${cap}${filled})"/>
+   <path d="${shape}" fill="#F1F5F6"/>
+   <clipPath id="${id}"><path d="${shape}"/></clipPath>
+   <g clip-path="url(#${id})">
+     <rect x="0" y="${bodyTop+bodyH-ph-dh}" width="30" height="${dh}" fill="var(--water)" opacity=".4"/>
+     <rect x="0" y="${bodyTop+bodyH-ph}" width="30" height="${ph}" fill="var(--water)"/>
+   </g>
   </svg>`;
 }
 
@@ -460,12 +482,22 @@ function render(){
   next.disabled=iso>=isoToday;
   renderShot(iso);
 
-  const w=day.water.reduce((a,b)=>a+b,0);
+  const plain=day.water.reduce((a,b)=>a+b,0);
+  const drink=day.items.reduce((a,i)=>a+(i[4]||0),0);
+  const w=plain+drink;
   wml.textContent=w.toLocaleString();
   wpct.textContent=Math.round(w/TGT.water*100)+'%';
-  let rest=w;
-  btls.innerHTML=BOTTLES.map(c=>{const f=Math.min(c,Math.max(0,rest));rest-=f;
-    return `<div class="btl">${bottleSVG(c,f)}<i>${c}</i></div>`}).join('');
+  wsplit.innerHTML=drink
+    ? `白開水 <b>${plain.toLocaleString()}</b>　其他飲品 <b>${drink.toLocaleString()}</b> ml`
+    : '';
+  wwarn.textContent=(w>=1200&&plain<TGT.plain)
+    ? `白開水還差 ${TGT.plain-plain} ml —— 茶類可以算一部分，但你尿酸偏高，白開水建議至少 ${TGT.plain} ml。` : '';
+  let start=0;
+  btls.innerHTML=BOTTLES.map(c=>{
+    const a=start,b=start+c;start=b;
+    const pf=Math.max(0,Math.min(b,plain)-a);
+    const df=Math.max(0,Math.min(b,w)-Math.max(a,plain));
+    return `<div class="btl">${bottleSVG(c,pf,df)}<i>${c}</i></div>`}).join('');
 
   bars.innerHTML=bar('蛋白質',+sum(2).toFixed(1),0,TGT.prot[0],TGT.prot[1],'g','var(--prot)')
     +bar('熱量',Math.round(sum(1)),0,TGT.kcal[0],TGT.kcal[1],'kcal','var(--kcal)')
@@ -503,7 +535,7 @@ document.addEventListener('click',async e=>{
   if(t.dataset.sx){const s=t.dataset.sx;
     day.sx=day.sx.includes(s)?day.sx.filter(x=>x!==s):[...day.sx,s];save();return}
   if(t.dataset.db){const d=DB[+t.dataset.db];
-    day.items.push([`${d.n} ${d.u}`,d.k,d.p,d.f]);save();return}
+    day.items.push([`${d.n} ${d.u}`,d.k,d.p,d.f,d.ml]);save();return}
   if(t.dataset.w){day.water.push(+t.dataset.w);save()}
   else if(t.id==='wundo'){day.water.pop();save()}
   else if(t.dataset.f){day.items.push(JSON.parse(t.dataset.f));save()}
