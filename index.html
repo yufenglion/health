@@ -117,8 +117,14 @@
   /* inputs */
   .grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px}
   label{display:block;font-size:11px;color:var(--mut);margin-bottom:3px}
-  input,select,textarea{width:100%;padding:9px 10px;border:1px solid var(--line);border-radius:9px;
-        font-family:var(--cn);font-size:15px;background:#fff;color:var(--ink)}
+  input,select,textarea{width:100%;border:1px solid var(--line);border-radius:9px;
+        font-family:var(--cn);font-size:16px;background:#fff;color:var(--ink);
+        -webkit-appearance:none;appearance:none;box-sizing:border-box}
+  input,select{height:44px;padding:0 10px;line-height:normal}
+  textarea{padding:10px;line-height:1.6}
+  select{padding-right:30px;background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='8'><path d='M1 1l5 5 5-5' stroke='%236E8088' stroke-width='1.8' fill='none' stroke-linecap='round'/></svg>");
+         background-repeat:no-repeat;background-position:right 11px center}
+  .grid .save{height:44px;padding:0;line-height:44px}
   .save{width:100%;padding:11px;border:0;border-radius:10px;background:var(--ink);color:#fff;
         font-family:var(--cn);font-size:14px;font-weight:700;cursor:pointer}
   .logs{margin-top:12px;font-size:13px}
@@ -151,8 +157,8 @@
   <div class="bottles" id="btls"></div>
   <div class="wbtns">
     <button data-w="150">+150</button>
+    <button data-w="200">+200</button>
     <button data-w="300">+300</button>
-    <button data-w="600">+600</button>
     <button class="gh" id="wundo">復原</button>
   </div>
   <p class="note" id="wwarn" style="margin-top:10px;color:#7A4232"></p>
@@ -166,19 +172,23 @@
   <div id="res"></div>
   <div id="foods"></div>
   <div class="gl" style="margin-top:14px">飲品換算　自己輸入毫升</div>
-  <div class="grid" style="grid-template-columns:1.5fr 1fr 0.9fr">
-    <div><label>飲品</label>
-      <select id="dsel"></select></div>
+  <div style="margin-bottom:8px">
+    <label>飲品</label>
+    <select id="dsel"></select>
+  </div>
+  <div class="grid" style="grid-template-columns:1fr 1fr">
     <div><label>毫升</label><input id="dml" inputmode="numeric" placeholder="500"></div>
-    <div><label>&nbsp;</label><button class="save" id="dgo" style="padding:9px 0">加入</button></div>
+    <div><label>&nbsp;</label><button class="save" id="dgo">加入</button></div>
   </div>
   <p class="note" id="dprev" style="margin:0 0 4px"></p>
 
   <div class="gl" style="margin-top:14px">自訂</div>
-  <div class="grid" style="grid-template-columns:1.4fr 1fr 1fr">
-    <div><label>名稱</label><input id="cn" placeholder="例：滷味"></div>
-    <div><label>熱量</label><input id="ck" inputmode="numeric" placeholder="kcal"></div>
-    <div><label>蛋白</label><input id="cp" inputmode="numeric" placeholder="g"></div>
+  <div style="margin-bottom:8px">
+    <label>名稱</label><input id="cn" placeholder="例：自助餐三菜一肉">
+  </div>
+  <div class="grid" style="grid-template-columns:1fr 1fr">
+    <div><label>熱量 kcal</label><input id="ck" inputmode="numeric" placeholder="500"></div>
+    <div><label>蛋白質 g</label><input id="cp" inputmode="numeric" placeholder="25"></div>
   </div>
   <button class="save" id="cadd">加入</button>
 </div>
@@ -207,11 +217,11 @@
     <span class="num" id="sptot" style="font-size:24px;color:var(--kcal)">$0</span>
   </div>
   <p class="note" id="spweek" style="margin:2px 0 11px"></p>
-  <div class="grid" style="grid-template-columns:1fr 1.4fr 0.9fr">
+  <div class="grid" style="grid-template-columns:0.8fr 1.2fr">
     <div><label>金額</label><input id="samt" inputmode="numeric" placeholder="120"></div>
     <div><label>用途</label><input id="slab" placeholder="午餐、飲料…"></div>
-    <div><label>&nbsp;</label><button class="save" id="spadd" style="padding:9px 0">加入</button></div>
   </div>
+  <button class="save" id="spadd">加入花費</button>
   <div id="splist" style="margin-top:6px"></div>
 </div>
 
@@ -268,8 +278,8 @@ const HABITS=[["walk","走路 20 分以上"],["lift","肌力訓練"],["sleep","�
 const DOSES=["0.25","0.5","1.0","1.7","2.4"];
 const DRINKS=[
  ["無糖豆漿",27,3.0],["無糖拿鐵",42,2.2],["美式咖啡",1,0.2],
- ["全脂鮮奶",63,3.3],["低脂鮮奶",44,3.3],["無糖茶／每朝／氣泡水",0,0]];
-const SUPS=["B群","葉黃素","蔓越莓錠","Collagen"];
+ ["全脂鮮奶",63,3.3],["低脂鮮奶",44,3.3],["無糖茶／每朝",0,0]];
+const SUPS=["B群","維他命C","胺基酸","葉黃素","蔓越莓錠","Collagen"];
 const SX=["噁心","胃脹","便祕","腹瀉","沒胃口","都還好"];
 
 /* 食物資料庫｜格式：名稱|份量|熱量|蛋白質|纖維|普林偏高
@@ -327,6 +337,44 @@ const DB=`白飯|半碗|130|2.4|0.4
 蛤蜊|1個掌心|40|8|0|1
 牡蠣|1個掌心|70|9|0|1
 花枝|1個掌心|60|13|0
+小卷|1隻|70|14|0|1
+透抽|1個掌心|75|16|0|1
+軟絲|1個掌心|65|14|0|1
+章魚|1個掌心|85|18|0|1
+干貝|1顆|30|6|0|1
+帆立貝|1顆|25|5|0|1
+淡菜|5顆|60|8|0|1
+文蛤|10顆|12|2.4|0|1
+海瓜子|10顆|15|3|0|1
+九孔|3顆|55|11|0|1
+鮑魚 小|1顆|45|9|0|1
+螃蟹 沙公|半隻|90|18|0|1
+蟹腳肉|5條|50|10|0|1
+明蝦|1隻|35|7|0|1
+甜蝦 生食|5隻|30|6|0|1
+蝦子 帶殼水煮|5隻|60|12|0|1
+魚卵|1匙|60|5|0|1
+柳葉魚|3條|110|11|0|1
+小魚乾|1匙|40|8|0|1
+櫻花蝦|1匙|35|6|0|1
+鯛魚片 生魚片|5片|85|16|0
+鮭魚 生魚片|5片|150|15|0
+旗魚|1個掌心|110|22|0
+土魠魚|1片|140|20|0
+鱸魚|1個掌心|100|20|0
+石斑魚|1個掌心|95|19|0
+比目魚|1個掌心|105|20|0
+鯧魚|1片|150|18|0
+黃魚|1條|130|18|0
+香魚|1條|150|17|0
+海鱸魚 清蒸|1條|180|32|0
+鮪魚 罐頭水煮|1罐|110|22|0
+鯖魚 罐頭|半罐|200|14|0|1
+蒲燒鰻|1片|280|20|0
+魚豆腐|3塊|120|6|0.5
+鱈魚 圓鱈|1片|200|18|0
+海鮮拼盤 火鍋|1盤|180|30|0|1
+綜合海鮮湯|1碗|150|20|1|1
 雞蛋|1顆|75|7|0
 蛋白|1顆|17|4|0
 傳統豆腐|1塊|88|8.5|0.6
@@ -389,7 +437,54 @@ const DB=`白飯|半碗|130|2.4|0.4
 鹽酥雞|小份|450|20|1
 炸雞排|1片|600|35|1
 胡椒餅|1個|350|12|1
-車輪餅|1個|200|4|1
+中式早餐 蛋餅 原味|1份|250|9|1
+中式早餐 蛋餅 加起司|1份|330|13|1
+中式早餐 蛋餅 加培根|1份|380|14|1
+中式早餐 蛋餅 加玉米|1份|290|10|2
+中式早餐 蔥抓餅 原味|1份|300|6|1.5
+中式早餐 蔥抓餅 加蛋|1份|400|10|2
+中式早餐 蘿蔔糕|2塊|220|3|1
+中式早餐 蘿蔔糕加蛋|1份|300|10|1
+中式早餐 鐵板麵 黑胡椒|1份|450|13|2
+中式早餐 鐵板麵加蛋|1份|530|20|2
+中式早餐 飯糰 傳統|1個|400|11|2
+中式早餐 飯糰 無油條|1個|330|11|2
+中式早餐 燒餅油條|1份|420|10|2
+中式早餐 燒餅夾蛋|1份|380|14|1.5
+中式早餐 小籠包|5顆|280|11|1
+中式早餐 蒸餃|8顆|380|16|2
+中式早餐 肉包|1個|250|9|1.5
+中式早餐 菜包|1個|200|6|3
+中式早餐 饅頭夾蛋|1個|300|13|1.5
+中式早餐 白饅頭|1個|220|6.5|1.2
+中式早餐 清粥小菜|1份|350|10|3
+中式早餐 鹹豆漿|1碗|200|10|1
+中式早餐 甜豆漿|1杯|150|7|1
+中式早餐 米漿|1杯|220|4|0.5
+中式早餐 蛋餅皮不加蛋|1份|180|4|1
+中式早餐 荷包蛋 單顆|1顆|90|7|0
+中式早餐 火腿蛋餅|1份|340|14|1
+中式早餐 玉米蛋餅加起司|1份|370|14|2
+紅豆餅 紅豆|1個|200|3|2
+紅豆餅 奶油|1個|210|3|0.5
+紅豆餅 起司玉米|1個|220|5|1
+紅豆餅 芋頭|1個|200|2.5|1.5
+紅豆餅 花生|1個|220|4|1.5
+紅豆餅 巧克力|1個|230|3|1
+紅豆餅 高麗菜 鹹|1個|180|4|1.5
+紅豆餅 蘿蔔絲 鹹|1個|170|3|1.5
+豆花 糖水|1碗|180|4|1
+豆花 無糖|1碗|90|4|1
+綜合豆花 粉圓紅豆|1碗|320|5|2
+紅豆湯|1碗|250|5|3
+芋圓地瓜圓|1碗|350|3|2.5
+仙草凍 糖水|1碗|120|1|1.5
+愛玉檸檬|1碗|110|0|1.5
+銅鑼燒|1個|180|4|1
+泡芙|1個|150|3|0.5
+布丁|1個|150|3|0
+蛋塔|1個|220|4|0.5
+黑糖糕|1塊|180|2|0.5
 自助餐 3菜1肉加飯|1餐|700|30|6
 日式鮭魚定食|1份|650|35|4
 蔬菜肉片火鍋|1鍋|600|35|8
