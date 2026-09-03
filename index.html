@@ -91,6 +91,9 @@
   .hint{margin-top:11px;padding:9px 11px;background:#FBF1EE;border-radius:9px;
         font-size:12px;line-height:1.6;color:#7A4232}
   .hint.calm{background:#F0F5F1;color:#3F6142}
+  .hint.alert{background:#FDECEA;color:#A32E1C;border:1px solid #E9B3AA;font-weight:700}
+  .shot.over{border-left-color:#C62828;border-left-width:4px;background:#FEF7F6}
+  .shot.over .lb b{color:#C62828}
   .dose{display:flex;gap:6px;margin-top:11px}
   .dose button{flex:1;border:1px solid var(--line);background:#fff;border-radius:9px;padding:8px 0;
        font-family:var(--cn);font-size:12px;color:var(--mut);cursor:pointer;font-variant-numeric:tabular-nums}
@@ -228,7 +231,7 @@
 <div class="card">
   <h2>備註</h2>
   <textarea id="ntxt" placeholder="今天的身體感受、外食狀況、想記下的事…" style="width:100%;height:80px;
-    padding:10px;border:1px solid var(--line);border-radius:9px;font-size:14px;
+    padding:10px;border:1px solid var(--line);border-radius:9px;
     font-family:var(--cn);line-height:1.6;resize:vertical;background:#fff;color:var(--ink)"></textarea>
 </div>
 
@@ -257,7 +260,7 @@
   <p class="note"><a href="#" id="ptog" style="color:var(--water)">檔案選不到？改用貼上 →</a></p>
   <div id="pwrap" style="display:none">
     <textarea id="ptxt" placeholder="把備份檔的內容整段貼進來" style="width:100%;height:90px;
-      padding:9px;border:1px solid var(--line);border-radius:9px;font-size:12px;
+      padding:9px;border:1px solid var(--line);border-radius:9px;
       font-family:ui-monospace,monospace;resize:vertical"></textarea>
     <button class="save" id="pgo" style="margin-top:8px">從貼上的內容匯入</button>
   </div>
@@ -679,16 +682,17 @@ function renderShot(iso){
   const mine=findShot(iso), last=lastShotBefore(iso);
   const gap=last?dayGap(last.d,iso):null;
   scard.classList.toggle('on',!!mine);
+  scard.classList.toggle('over',gap!==null&&gap>=6&&!mine);
   let hint='';
   if(mine){
     hint=`<div class="hint">打針當天通常還算舒服，副作用多半在接下來 1～2 天。今天正常吃、正常走就好。</div>
       <div class="dose">${DOSES.map(d=>`<button data-dose="${d}" class="${mine.dose===d?'on':''}">${d} mg</button>`).join('')}</div>`;
   }else if(gap===1||gap===2){
     hint=`<div class="hint">打針後第 ${gap} 天 —— 腸胃反應常在這兩天最明顯。不舒服就把運動改成散步，優先補水和蛋白質。</div>`;
-  }else if(gap===6){
-    hint=`<div class="hint calm">距離上次打針 6 天，明天大概是下一針。針具記得先從冰箱拿出來回溫。</div>`;
-  }else if(gap!==null&&gap>7){
-    hint=`<div class="hint">距離上次打針已經 ${gap} 天，超過一週了。要不要確認一下是不是漏打？</div>`;
+  }else if(gap===5){
+    hint=`<div class="hint calm">距離上次打針 5 天，明天大概是下一針。針具記得先從冰箱拿出來回溫。</div>`;
+  }else if(gap!==null&&gap>=6){
+    hint=`<div class="hint alert">已經 ${gap} 天沒打針了（上次 ${last.d.slice(5)}）。如果不是醫師交代的調整，請確認是否漏打。</div>`;
   }
   scard.innerHTML=`<div class="srow"><div class="lb">
       <b>💉 Wegovy${mine?`<span class="pill">${mine.dose} mg</span>`:''}</b>
